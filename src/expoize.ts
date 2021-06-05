@@ -14,7 +14,7 @@ const origBabelConfigJs = require(PROJECT_PATH + '/babel.config.js');
 const { readFile: fsReadFile, writeFile: fsWriteFile } = require('fs/promises');
 // eslint-disable-next-line security/detect-child-process
 const { execSync } = require('child_process');
-//npx ts-node -O '{"isolatedModules":false}' expoize.ts
+
 const BANNER =
   '                             o              ' +
   '\n' +
@@ -151,7 +151,10 @@ const patchAppJson = async (
     }),
   );
 
-  return writeFile(PROJECT_PATH + '/app.json', Buffer.from(JSON.stringify(patchedAppJson)));
+  return writeFile(
+    PROJECT_PATH + '/app.json',
+    Buffer.from(JSON.stringify(patchedAppJson)),
+  );
 };
 
 type TsconfigInputValue = Record<string, any> & {
@@ -223,6 +226,15 @@ const patchBabelConfigJs = async (
     inputs['babel.config.js'],
   );
 
+const npmInstall = async (packageList: string[]): Promise<any> => {
+  const ret = await sysExec(
+    'npm --json install ' + packageList.join(' '),
+    true,
+  );
+  console.log(ret);
+  return ret;
+};
+
 const main = async (): Promise<boolean> => {
   const versions = await detectVersions();
 
@@ -266,18 +278,18 @@ const main = async (): Promise<boolean> => {
 
   console.log('*** installing needed packages...');
 
-  await sysExec(
-    'npm --json install react-native@' +
-      versions['react-native'] +
-      ' react@' +
-      versions['react'] +
-      ' react-dom@' +
-      versions['react'] +
-      ' expo@' +
-      versions['expo'] +
-      ' @expo/webpack-config babel-preset-expo react-native-gesture-handler react-native-reanimated react-native-screens react-native-web',
-    true,
-  );
+  await npmInstall([
+    'react-native@' + versions['react-native'],
+    'react@' + versions['react'],
+    'react-dom@' + versions['react'],
+    'expo@' + versions['expo'],
+    '@expo/webpack-config',
+    'babel-preset-expo',
+    'react-native-gesture-handler',
+    'react-native-reanimated',
+    'react-native-screens',
+    'react-native-web',
+  ]);
 
   return true;
 };
