@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /* eslint @typescript-eslint/no-var-requires:0, dot-notation:0 */
 
 const jsonpatch = require('jsonpatch');

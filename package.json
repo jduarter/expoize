@@ -1,10 +1,14 @@
 {
   "name": "expoize",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "💫 convert React Native projects into Expo environments.",
-  "main": "dist/expoize.js",
+  "main": "build/expoize.js",
+  "bin": {
+    "expoize": "build/expoize.js"
+  },
   "types": "types/expoize.d.ts",
   "scripts": {
+    "build": "npx tsc --build tsconfig.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
