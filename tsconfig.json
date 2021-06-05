@@ -33,5 +33,5 @@
 		"skipLibCheck": true,
 		"strict": true
 	},
-	"exclude": ["build/","node_modules"]
+	"exclude": ["templates", "build","types","node_modules"]
 }

@@ -1,5 +1,8 @@
+#!/usr/bin/env node
 /// <reference types="node" />
 declare const jsonpatch: any;
+declare const TEMPLATES_PATH: string;
+declare const PROJECT_PATH: string;
 declare const origPackageJson: any;
 declare const origAppJson: any;
 declare const origTsconfigJson: any;

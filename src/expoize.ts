@@ -3,10 +3,13 @@
 
 const jsonpatch = require('jsonpatch');
 
-const origPackageJson = require('./package.json');
-const origAppJson = require('./app.json');
-const origTsconfigJson = require('./tsconfig.json');
-const origBabelConfigJs = require('./babel.config.js');
+const TEMPLATES_PATH = __dirname + '/../templates';
+const PROJECT_PATH = process.cwd();
+
+const origPackageJson = require(PROJECT_PATH + '/package.json');
+const origAppJson = require(PROJECT_PATH + '/app.json');
+const origTsconfigJson = require(PROJECT_PATH + '/tsconfig.json');
+const origBabelConfigJs = require(PROJECT_PATH + '/babel.config.js');
 
 const { readFile: fsReadFile, writeFile: fsWriteFile } = require('fs/promises');
 // eslint-disable-next-line security/detect-child-process
@@ -45,10 +48,9 @@ const writeFile = async (
   let logOpResult = '[ERROR]';
   let bytesWritten = -1;
   try {
-    bytesWritten = quiet
-      ? bufToWrite.length
-      : await fsWriteFile(fileName, bufToWrite);
-    logOpResult = '[OK] bytesWritten=' + bytesWritten;
+    bytesWritten = bufToWrite.length;
+    await fsWriteFile(fileName, bufToWrite);
+    logOpResult = '[OK] ' + bytesWritten + ' bytes written';
   } catch (err) {
     logOpResult = '[ERROR] ' + err.name + ': ' + err.message;
   }
@@ -149,7 +151,7 @@ const patchAppJson = async (
     }),
   );
 
-  return writeFile('./app.json', Buffer.from(JSON.stringify(patchedAppJson)));
+  return writeFile(PROJECT_PATH + '/app.json', Buffer.from(JSON.stringify(patchedAppJson)));
 };
 
 type TsconfigInputValue = Record<string, any> & {
@@ -184,7 +186,7 @@ const patchTsconfigJson = async (
   inputs: Record<'tsconfig.json', TsconfigInputValue>,
 ): Promise<number> =>
   simplePatch<TsconfigInputValue>(
-    './tsconfig.json',
+    PROJECT_PATH + '/tsconfig.json',
     TSCONFIG_JSON_PATCH,
     inputs['tsconfig.json'],
   );
@@ -216,7 +218,7 @@ const patchBabelConfigJs = async (
   inputs: Record<'babel.config.js', BabelInputValue>,
 ): Promise<number> =>
   simplePatch(
-    './babel.config.js',
+    PROJECT_PATH + '/babel.config.js',
     BABEL_CONFIG_JS_PATCH,
     inputs['babel.config.js'],
   );
@@ -231,7 +233,7 @@ const main = async (): Promise<boolean> => {
 
   await patchTsconfigJson({ 'tsconfig.json': origTsconfigJson });
 
-  const origIndexJs = await readFile('./index.js');
+  const origIndexJs = await readFile(PROJECT_PATH + '/index.js');
 
   await patchBabelConfigJs({ 'babel.config.js': origBabelConfigJs });
 
@@ -247,18 +249,18 @@ const main = async (): Promise<boolean> => {
       "import { AppRegistry } from 'react-native';",
       "import { registerRootComponent } from 'expo';",
     );
-  await writeFile('./index.js', patchedIndexJs);
+  await writeFile(PROJECT_PATH + '/index.js', patchedIndexJs);
 
   const patchedWebpackJsConf = await readFile(
-    './expoize-template.webpack.config.js',
+    TEMPLATES_PATH + '/webpack.config.js',
   );
-  await writeFile('./webpack.config.js', patchedWebpackJsConf);
+  await writeFile(PROJECT_PATH + '/webpack.config.js', patchedWebpackJsConf);
 
   const patchedMetroJsConf = await readFile(
-    './expoize-template.metro.config.js',
+    TEMPLATES_PATH + '/metro.config.js',
   );
 
-  await writeFile('./metro.config.js', patchedMetroJsConf);
+  await writeFile(PROJECT_PATH + '/metro.config.js', patchedMetroJsConf);
 
   console.log('');
 
