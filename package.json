@@ -1,0 +1,25 @@
+{
+  "name": "expoize",
+  "version": "0.0.1",
+  "description": "💫 convert React Native projects into Expo environments.",
+  "main": "dist/expoize.js",
+  "types": "types/expoize.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "expoize",
+    "expo",
+    "convert",
+    "react",
+    "native"
+  ],
+  "author": "Jorge Duarte Rodríguez <info@malagadev.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "jsonpatch": "^3.0.1",
+    "ts-node": "^10.0.0",
+    "tsc": "^2.0.3",
+    "typescript": "^4.3.2"
+  }
+}
