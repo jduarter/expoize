@@ -9,8 +9,9 @@ Warning: This project is on pre-release stage. It's not stable for production ye
 
 ### Important!
 
-1. You **MUST** perform a backup of your code before executing this application.
-2. You **SHOULD** use versioning control and commit your pending changes **before** executing this script. 
+You **MUST**:
+1. perform a backup of your code before executing this script.
+2. use versioning control and commit your pending changes **before** executing this script. 
 
 ### 1. No install via `npx`
 
