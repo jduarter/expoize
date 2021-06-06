@@ -1,9 +1,9 @@
 {
 	"compilerOptions": {
 		"baseUrl": ".",
-		"rootDir": "./src/",
-		"declarationDir": "./types",
-		"outDir": "./build/",
+		"rootDir": "src",
+		"declarationDir": "types",
+		"outDir": "build",
 		"composite": true,
 		"noImplicitAny": true,
 		"strictNullChecks": true,
@@ -12,10 +12,10 @@
 		"allowSyntheticDefaultImports": true,
 		"esModuleInterop": true,
 		"isolatedModules": false,
-		"types": ["node"],
+		"types": ["node", "package-info"],
 		"typeRoots": ["./node_modules/@types"],
 		"lib": ["esnext"],
-		"module": "esnext",
+		"module": "CommonJS",
 		"moduleResolution": "node",
 		"experimentalDecorators": true,
 		"noImplicitReturns": true,
@@ -33,5 +33,6 @@
 		"skipLibCheck": true,
 		"strict": true
 	},
-	"exclude": ["templates", "build","types","node_modules"]
+	"include": ["src/"],
+	"exclude": ["coverage-ts/", "templates/", "build/", "types/", "node_modules/"]
 }

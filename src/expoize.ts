@@ -1,5 +1,20 @@
 #!/usr/bin/env node
 /* eslint @typescript-eslint/no-var-requires:0, dot-notation:0 */
+import { runWithLog } from './runWithLog';
+
+import sysExec, { SEJsonParser, SEPlaintextParser } from './sysExec';
+import type { SysExecParser, SysExecRetState } from './sysExec';
+import type {
+  PackageInfoParser,
+  PackageJson,
+  TargetVersions,
+  PatchFunc,
+  AppJsonPatchFunc,
+  BabelInputValue,
+  TsconfigInputValue,
+  PackageInstallResult,
+  PackageInstallErrorResult,
+} from './types';
 
 const jsonpatch = require('jsonpatch');
 
@@ -12,86 +27,51 @@ const origTsconfigJson = require(PROJECT_PATH + '/tsconfig.json');
 const origBabelConfigJs = require(PROJECT_PATH + '/babel.config.js');
 
 const { readFile: fsReadFile, writeFile: fsWriteFile } = require('fs/promises');
-// eslint-disable-next-line security/detect-child-process
-const { execSync } = require('child_process');
 
-const BANNER =
-  '                             o              ' +
-  '\n' +
-  '                                             ' +
-  '\n' +
-  ".oPYo. `o  o' .oPYo. .oPYo. o8 .oooo. .oPYo. " +
-  '\n' +
-  "8oooo8  `bd'  8    8 8    8  8   .dP  8oooo8 " +
-  '\n' +
-  "8.      d'`b  8    8 8    8  8  oP'   8.     " +
-  '\n' +
-  "`Yooo' o'  `o 8YooP' `YooP'  8 `Yooo' `Yooo' " +
-  '\n' +
-  ':.....:..:::..8 ....::.....::..:.....::.....:' +
-  '\n' +
-  '::::::::::::::8 :::::::::::::::::::::::::::::' +
-  '\n' +
-  '::::::::::::::..:::::::::::::::::::::::::::::';
-
-console.log(BANNER);
+require('./banner');
 
 const readFile = async (fileName: string) => {
   const buf = await fsReadFile(fileName);
   return buf.toString();
 };
+
 const writeFile = async (
   fileName: string,
   bufToWrite: Buffer,
   quiet = false,
-) => {
-  let logOpResult = '[ERROR]';
-  let bytesWritten = -1;
-  try {
-    bytesWritten = bufToWrite.length;
-    await fsWriteFile(fileName, bufToWrite);
-    logOpResult = '[OK] ' + bytesWritten + ' bytes written';
-  } catch (err) {
-    logOpResult = '[ERROR] ' + err.name + ': ' + err.message;
-  }
-  console.log('*** patching file: ' + fileName + '...\t\t\t ' + logOpResult);
+): Promise<boolean> =>
+  undefined ===
+  (await runWithLog<undefined>(fsWriteFile(fileName, bufToWrite), {
+    quiet,
+    successCondition: (res: unknown) => res === undefined,
+    mainMessage: 'patch file: ' + fileName,
+    successMessage: bufToWrite.length + ' bytes written',
+  }));
 
-  return bytesWritten;
-};
+const getNPMPackageInfo = async (pkgName: string): Promise<PackageJson> => {
+  const result = await sysExec<PackageInfoParser>(
+    'npm',
+    ['view', '--json', pkgName],
+    SEJsonParser as PackageInfoParser,
+  );
 
-const sysExec = async (cmd: string, isJson = true, quiet = false) => {
-  console.log('' + '> ' + cmd + '\n\n');
-
-  if (quiet) {
-    return null;
+  if (!result || !result.parsedStdOut) {
+    throw new Error('getNPMPackageInfo: result in stdOut was null.');
   }
 
-  const x = execSync(cmd);
-
-  return isJson ? JSON.parse(x.toString('utf-8')) : x.toString('utf-8');
+  return result.parsedStdOut;
 };
-
-interface TargetVersions {
-  expo: string;
-  'react-native': string;
-  react: string;
-}
-
-type PatchFunc<OT> = ({ orig }: { orig: OT }) => string;
-
-type AppJsonPatchFunc = (
-  input: Record<'app.json' | 'package.json', Record<string, any>>,
-) => [Record<string, any>];
 
 const detectVersions = async (
   forceExpoVersion: null | string = null,
 ): Promise<TargetVersions> => {
-  const expoPackageJson = await sysExec(
-    'npm view --json ' +
-      (forceExpoVersion ? 'expo@' + forceExpoVersion : 'expo@latest'),
-  );
   const targetVersions: TargetVersions = {} as TargetVersions;
+  const expoPackageJson = await getNPMPackageInfo(
+    'expo@' + (forceExpoVersion || 'latest'),
+  );
+
   targetVersions['expo'] = expoPackageJson['dist-tags'].latest;
+
   const expoDevDeps = expoPackageJson.devDependencies;
 
   targetVersions['react-native'] = expoDevDeps['react-native'];
@@ -113,7 +93,7 @@ const simplePatch = async <OT = string>(
   fileName: string,
   patchFunc: PatchFunc<OT>,
   input: OT,
-): Promise<number> =>
+): Promise<boolean> =>
   writeFile(
     fileName,
     Buffer.from(
@@ -142,7 +122,7 @@ const APP_JSON_PATCH: AppJsonPatchFunc = ({
 const patchAppJson = async (
   inputs: Record<'app.json', Record<'name', string>> &
     Record<'package.json', Record<'version', string>>,
-): Promise<number> => {
+): Promise<boolean> => {
   const patchedAppJson = jsonpatch.apply_patch(
     inputs['app.json'],
     APP_JSON_PATCH({
@@ -155,10 +135,6 @@ const patchAppJson = async (
     PROJECT_PATH + '/app.json',
     Buffer.from(JSON.stringify(patchedAppJson)),
   );
-};
-
-type TsconfigInputValue = Record<string, any> & {
-  compilerOptions: { lib: string[] };
 };
 
 const TSCONFIG_JSON_PATCH: PatchFunc<TsconfigInputValue> = ({ orig }) =>
@@ -187,14 +163,12 @@ const TSCONFIG_JSON_PATCH: PatchFunc<TsconfigInputValue> = ({ orig }) =>
 
 const patchTsconfigJson = async (
   inputs: Record<'tsconfig.json', TsconfigInputValue>,
-): Promise<number> =>
+): Promise<boolean> =>
   simplePatch<TsconfigInputValue>(
     PROJECT_PATH + '/tsconfig.json',
     TSCONFIG_JSON_PATCH,
     inputs['tsconfig.json'],
   );
-
-type BabelInputValue = Record<string, any> & { presets: string[] };
 
 const BABEL_CONFIG_JS_PATCH: PatchFunc<BabelInputValue> = ({ orig }) =>
   'module.exports = ' +
@@ -219,17 +193,55 @@ const BABEL_CONFIG_JS_PATCH: PatchFunc<BabelInputValue> = ({ orig }) =>
 
 const patchBabelConfigJs = async (
   inputs: Record<'babel.config.js', BabelInputValue>,
-): Promise<number> =>
+): Promise<boolean> =>
   simplePatch(
     PROJECT_PATH + '/babel.config.js',
     BABEL_CONFIG_JS_PATCH,
     inputs['babel.config.js'],
   );
 
-const npmInstall = async (packageList: string[]): Promise<any> => {
+const npmInstall = async (packageList: string[]) => {
+  const action = sysExec('npm', ['install', '--json', ...packageList], ((
+    buf: Buffer,
+  ) => {
+    // sanitize JSON omiting installs, postinstalls verbose.
+    const i = buf.indexOf('\n{');
+
+    const bbuf = i > -1 ? buf.slice(i + 1) : buf;
+
+    return SEJsonParser(bbuf);
+  }) as SysExecParser<PackageInstallResult>);
+
+  return runWithLog<null | SysExecRetState<
+    PackageInstallResult | PackageInstallErrorResult
+  >>(action, {
+    quiet: false,
+    successCondition: (res) => {
+      const isError =
+        !res?.parsedStdOut ||
+        res?.exitCode === 1 ||
+        'error' in res.parsedStdOut;
+
+      if (isError) {
+        /*  const errorInfo = res?.parsedStdOut as PackageInstallErrorResult;
+        console.log('ERROR: ', errorInfo);
+        */
+        return false;
+      }
+
+      return true;
+    },
+    mainMessage: 'install packages using npm: ' + packageList.join(', '),
+    successMessage: packageList.length + ' packages added/updated',
+  });
+};
+
+const expoInstall = async (packageList: string[]): Promise<any> => {
   const ret = await sysExec(
-    'npm --json install ' + packageList.join(' '),
-    true,
+    'npx',
+    ['expo-cli', 'install', ...packageList],
+    SEPlaintextParser,
+    { readTimeout: 60000 },
   );
   console.log(ret);
   return ret;
@@ -245,12 +257,12 @@ const main = async (): Promise<boolean> => {
 
   await patchTsconfigJson({ 'tsconfig.json': origTsconfigJson });
 
-  const origIndexJs = await readFile(PROJECT_PATH + '/index.js');
-
   await patchBabelConfigJs({ 'babel.config.js': origBabelConfigJs });
 
   // @todo: convert this to regexps having in consideration the
   // appName and the kind of quotes.
+
+  const origIndexJs = await readFile(PROJECT_PATH + '/index.js');
 
   const patchedIndexJs = origIndexJs
     .replace(
@@ -274,15 +286,15 @@ const main = async (): Promise<boolean> => {
 
   await writeFile(PROJECT_PATH + '/metro.config.js', patchedMetroJsConf);
 
-  console.log('');
-
-  console.log('*** installing needed packages...');
-
   await npmInstall([
     'react-native@' + versions['react-native'],
     'react@' + versions['react'],
     'react-dom@' + versions['react'],
-    'expo@' + versions['expo'],
+  ]);
+
+  await npmInstall(['expo@' + versions['expo'], 'expo-cli']);
+
+  const r3 = await expoInstall([
     '@expo/webpack-config',
     'babel-preset-expo',
     'react-native-gesture-handler',
@@ -290,8 +302,19 @@ const main = async (): Promise<boolean> => {
     'react-native-screens',
     'react-native-web',
   ]);
+  console.log({ r3 });
+  await sysExec('npx', ['expo-cli', 'doctor'], undefined, {
+    readTimeout: 60000,
+  });
 
   return true;
 };
 
-main();
+(async () => {
+  try {
+    await main();
+    process.exit(0);
+  } catch (err) {
+    process.exit(1);
+  }
+})();
