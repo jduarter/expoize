@@ -1,6 +1,6 @@
 {
   "name": "expoize",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "💫 convert React Native projects into Expo environments.",
   "repository": "https://github.com/jduarter/expoize",
   "main": "build/expoize.js",
@@ -24,12 +24,15 @@
   "license": "MIT",
   "dependencies": {
     "jsonpatch": "^3.0.1",
+    "ora": "^5.4.0",
+    "throwable-error": "0.0.1",
     "ts-node": "^10.0.0",
     "tsc": "^2.0.3",
     "typescript": "^4.3.2"
   },
   "devDependencies": {
     "@types/node": "^15.12.1",
+    "@types/package-info": "^3.0.0",
     "prettier": "^2.3.1"
   }
 }
