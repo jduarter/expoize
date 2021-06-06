@@ -13,18 +13,25 @@ You **MUST**:
 1. perform a backup of your code before executing this script.
 2. use versioning control and commit your pending changes **before** executing this script. 
 
-### 1. No install via `npx`
+### 1. Run with no install (via `npx`)
 
-You don't need to install the package if you already have the `npx` command in your system.
+You don't need to install the package if you already have the `npx` command in your system:
 
+Run:
 ```
 npx expoize
 ```
 
 ### 2. Install as `devDepedency`
 
+Install: 
 ```
 npm install --save-dev expoize
+```
+
+Run:
+```
+./node_modules/.bin/expoize
 ```
 
 ## Requirements
