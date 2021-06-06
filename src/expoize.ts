@@ -40,7 +40,7 @@ const writeFile = async (
   bufToWrite: Buffer,
   quiet = false,
 ): Promise<boolean> =>
-  undefined ===
+undefined ===
   (await runWithLog<undefined>(fsWriteFile(fileName, bufToWrite), {
     quiet,
     successCondition: (res: unknown) => res === undefined,
@@ -311,6 +311,9 @@ const main = async (): Promise<boolean> => {
     'react-native-screens',
     'react-native-web',
   ]);
+  await sysExec('npx', ['expo-cli', 'doctor'], undefined, {
+    readTimeout: 60000,
+  });
 
   await sysExec('npx', ['expo-cli', 'doctor'], undefined, {
     readTimeout: 60000,
