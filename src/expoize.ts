@@ -216,7 +216,11 @@ const npmInstall = async (packageList: string[]) => {
     PackageInstallResult | PackageInstallErrorResult
   >>(action, {
     quiet: false,
-    successCondition: (res) => {
+    successCondition: (
+      res: null | SysExecRetState<
+        PackageInstallResult | PackageInstallErrorResult
+      >,
+    ) => {
       const isError =
         !res?.parsedStdOut ||
         res?.exitCode === 1 ||
@@ -237,14 +241,19 @@ const npmInstall = async (packageList: string[]) => {
 };
 
 const expoInstall = async (packageList: string[]): Promise<any> => {
-  const ret = await sysExec(
+  const action = sysExec(
     'npx',
     ['expo-cli', 'install', ...packageList],
     SEPlaintextParser,
-    { readTimeout: 60000 },
+    {
+      readTimeout: 60000,
+    },
   );
-  console.log(ret);
-  return ret;
+  return runWithLog<null | SysExecRetState<string>>(action, {
+    quiet: false,
+    mainMessage: 'install packages using expo: ' + packageList.join(', '),
+    successMessage: packageList.length + ' packages added/updated',
+  });
 };
 
 const main = async (): Promise<boolean> => {
@@ -294,7 +303,7 @@ const main = async (): Promise<boolean> => {
 
   await npmInstall(['expo@' + versions['expo'], 'expo-cli']);
 
-  const r3 = await expoInstall([
+  await expoInstall([
     '@expo/webpack-config',
     'babel-preset-expo',
     'react-native-gesture-handler',
@@ -302,7 +311,7 @@ const main = async (): Promise<boolean> => {
     'react-native-screens',
     'react-native-web',
   ]);
-  console.log({ r3 });
+
   await sysExec('npx', ['expo-cli', 'doctor'], undefined, {
     readTimeout: 60000,
   });
