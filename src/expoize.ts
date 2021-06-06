@@ -40,7 +40,7 @@ const writeFile = async (
   bufToWrite: Buffer,
   quiet = false,
 ): Promise<boolean> =>
-undefined ===
+  undefined ===
   (await runWithLog<undefined>(fsWriteFile(fileName, bufToWrite), {
     quiet,
     successCondition: (res: unknown) => res === undefined,
@@ -256,6 +256,17 @@ const expoInstall = async (packageList: string[]): Promise<any> => {
   });
 };
 
+const expoDoctor = async (): Promise<any> => {
+  const action = sysExec('npx', ['expo-cli', 'doctor'], SEPlaintextParser, {
+    readTimeout: 60000,
+  });
+  return runWithLog<null | SysExecRetState<string>>(action, {
+    quiet: false,
+    mainMessage: 'running expo doctor',
+    successMessage: 'success',
+  });
+};
+
 const main = async (): Promise<boolean> => {
   const versions = await detectVersions();
 
@@ -311,13 +322,8 @@ const main = async (): Promise<boolean> => {
     'react-native-screens',
     'react-native-web',
   ]);
-  await sysExec('npx', ['expo-cli', 'doctor'], undefined, {
-    readTimeout: 60000,
-  });
 
-  await sysExec('npx', ['expo-cli', 'doctor'], undefined, {
-    readTimeout: 60000,
-  });
+  await expoDoctor();
 
   return true;
 };
