@@ -7,17 +7,22 @@ Warning: This project is on pre-release stage. It's not stable for production ye
 
 ## Usage
 
+### Important!
+
+1. You **MUST** perform a backup of your code before executing this application.
+2. You **SHOULD** use versioning control and commit your pending changes **before** executing this script. 
+
 ### 1. No install via `npx`
 
 You don't need to install the package if you already have the `npx` command in your system.
 
-```javascript
+```
 npx expoize
 ```
 
 ### 2. Install as `devDepedency`
 
-```javascript
+```
 npm install --save-dev expoize
 ```
 
