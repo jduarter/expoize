@@ -157,7 +157,7 @@ const TSCONFIG_JSON_PATCH: PatchFunc<TsconfigInputValue> = ({ orig }) =>
         : {}),
     },
     ...(orig.extends
-      ? { extends: [...new Set([orig.extends])] }
+      ? { extends: [...new Set([orig.extends, 'expo/tsconfig.base'])] }
       : { extends: 'expo/tsconfig.base' }),
   });
 
@@ -333,6 +333,7 @@ const main = async (): Promise<boolean> => {
     await main();
     process.exit(0);
   } catch (err) {
+    console.log(err.message);
     process.exit(1);
   }
 })();
