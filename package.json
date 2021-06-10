@@ -1,6 +1,6 @@
 {
   "name": "expoize",
-  "version": "0.0.10-beta.1",
+  "version": "0.0.11-beta.1",
   "description": "💫 convert React Native projects into Expo environments.",
   "typeCoverage": {
     "atLeast": 91.54,
@@ -27,9 +27,10 @@
   "author": "Jorge Duarte Rodríguez <info@malagadev.com>",
   "license": "MIT",
   "dependencies": {
+    "abortcontroller-polyfill": "^1.7.3",
     "jsonpatch": "^3.0.1",
     "ora": "^5.4.0",
-    "throwable-error": "0.0.1",
+    "throwable-error": "0.1.1",
     "ts-node": "^10.0.0",
     "tsc": "^2.0.3",
     "typescript": "^4.3.2"
