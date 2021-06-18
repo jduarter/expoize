@@ -3,8 +3,7 @@
   "version": "0.0.12-beta.1",
   "description": "💫 convert React Native projects into Expo environments.",
   "typeCoverage": {
-    "atLeast": 91.54,
-    "is": 91.54
+    "atLeast": 92.9
   },
   "repository": "https://github.com/jduarter/expoize",
   "main": "build/expoize.js",
