@@ -2,8 +2,8 @@
 /* eslint @typescript-eslint/no-var-requires:0, dot-notation:0 */
 import { runWithLog } from './runWithLog';
 
-import sysExec, { SEJsonParser, SEPlaintextParser } from './sysExec';
-import type { SysExecParser, SysExecRetState } from './sysExec';
+import { sysExec, SEJsonParser, SEPlaintextParser } from '@jduarter/sysexec';
+import type { SysExecParser, SysExecRetState } from '@jduarter/sysexec';
 import type {
   PackageInfoParser,
   PackageJson,
@@ -25,6 +25,8 @@ const origPackageJson = require(PROJECT_PATH + '/package.json');
 const origAppJson = require(PROJECT_PATH + '/app.json');
 const origTsconfigJson = require(PROJECT_PATH + '/tsconfig.json');
 const origBabelConfigJs = require(PROJECT_PATH + '/babel.config.js');
+
+const NPM_INSTALL_READ_TIMEOUT = 60 * 5 * 1000;
 
 const { readFile: fsReadFile, writeFile: fsWriteFile } = require('fs/promises');
 
@@ -200,17 +202,22 @@ const patchBabelConfigJs = async (
     inputs['babel.config.js'],
   );
 
+const NPMParser = ((buf: Buffer) => {
+  // sanitize JSON omiting installs, postinstalls verbose.
+  const i = buf.indexOf('\n{');
+
+  const bbuf = i > -1 ? buf.slice(i + 1) : buf;
+
+  return SEJsonParser(bbuf);
+}) as SysExecParser<PackageInstallResult>;
+
 const npmInstall = async (packageList: string[]) => {
-  const action = sysExec('npm', ['install', '--json', ...packageList], ((
-    buf: Buffer,
-  ) => {
-    // sanitize JSON omiting installs, postinstalls verbose.
-    const i = buf.indexOf('\n{');
-
-    const bbuf = i > -1 ? buf.slice(i + 1) : buf;
-
-    return SEJsonParser(bbuf);
-  }) as SysExecParser<PackageInstallResult>);
+  const action = sysExec(
+    'npm',
+    ['install', '--json', ...packageList],
+    NPMParser,
+    { readTimeout: NPM_INSTALL_READ_TIMEOUT },
+  );
 
   return runWithLog<null | SysExecRetState<
     PackageInstallResult | PackageInstallErrorResult

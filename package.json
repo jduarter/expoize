@@ -27,6 +27,8 @@
   "author": "Jorge Duarte Rodríguez <info@malagadev.com>",
   "license": "MIT",
   "dependencies": {
+    "@jduarter/enhanced-promise": "0.0.6",
+    "@jduarter/sysexec": "0.0.1",
     "abortcontroller-polyfill": "^1.7.3",
     "jsonpatch": "^3.0.1",
     "ora": "^5.4.0",
