@@ -1,4 +1,4 @@
-import type { SysExecParser } from './sysExec';
+import type { SysExecParser } from '@jduarter/sysexec';
 import type { default as PackageInfoTypes } from 'package-info';
 
 export interface TargetVersions {
