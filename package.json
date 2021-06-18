@@ -12,6 +12,7 @@
   },
   "types": "types/expoize.d.ts",
   "scripts": {
+    "typescript": "npx tsc --noEmit --composite false",
     "build": "npx tsc --build tsconfig.json",
     "prepublishOnly": "rm -rf node_modules/ tsconfig.tsbuildinfo package-lock.json",
     "test": "echo \"Error: no test specified\" && exit 1"
