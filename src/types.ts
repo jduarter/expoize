@@ -9,13 +9,30 @@ export interface TargetVersions {
 
 export type PatchFunc<OT> = ({ orig }: { orig: OT }) => string;
 
-export type AppJsonPatchFunc = (
-  input: Record<'app.json' | 'package.json', Record<string, any>>,
-) => [Record<string, any>];
+export type AppJson = {
+  name: string;
+  displayName: string;
+  expo?: {
+    name: string;
+    slug: string;
+    assetBundlePatterns: string[];
+    version: string;
+  };
+};
+
+export type AppJsonPatchFunc = (input: {
+  'app.json': Partial<AppJson>;
+  'package.json': PackageJson;
+}) => [Record<string, any> /* @todo-type */];
 
 export type PackageJson = PackageInfoTypes.Package & {
   'dist-tags': { latest: string };
   devDependencies: Record<string, string>;
+  author: string;
+  description: string;
+  homepage: string;
+  license: string;
+  name: string;
 };
 
 export type PackageInfoParser = SysExecParser<PackageJson>;
