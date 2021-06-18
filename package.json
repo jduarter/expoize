@@ -43,6 +43,8 @@
     "typescript": "^4.3.2"
   },
   "devDependencies": {
+    "@codechecks/build-size-watcher": "^0.1.0",
+    "@codechecks/client": "^0.1.10",
     "@types/node": "^15.12.1",
     "@types/package-info": "^3.0.0",
     "prettier": "^2.3.1",
