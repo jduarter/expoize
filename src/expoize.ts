@@ -14,6 +14,7 @@ import type {
   TsconfigInputValue,
   PackageInstallResult,
   PackageInstallErrorResult,
+  AppJson,
 } from './types';
 
 const jsonpatch = require('jsonpatch');
@@ -121,11 +122,11 @@ const APP_JSON_PATCH: AppJsonPatchFunc = ({
   },
 ];
 
-const patchAppJson = async (
-  inputs: Record<'app.json', Record<'name', string>> &
-    Record<'package.json', Record<'version', string>>,
-): Promise<boolean> => {
-  const patchedAppJson = jsonpatch.apply_patch(
+const patchAppJson = async (inputs: {
+  'app.json': AppJson;
+  'package.json': PackageJson;
+}): Promise<boolean> => {
+  const patchedAppJson: AppJson = jsonpatch.apply_patch(
     inputs['app.json'],
     APP_JSON_PATCH({
       'app.json': inputs['app.json'],
