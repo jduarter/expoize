@@ -6,14 +6,15 @@
     "atLeast": 92.9
   },
   "repository": "https://github.com/jduarter/expoize",
-  "main": "build/expoize.js",
   "bin": {
-    "expoize": "build/expoize.js"
+    "expoize": "build/expoize.min.js"
   },
-  "types": "types/expoize.d.ts",
+  "main": "build/expoize.min.js",
+  "types": "build/expoize.d.ts",
+  "module": "build/expoize.esm.js",
   "scripts": {
     "typescript": "npx tsc --noEmit --composite false",
-    "build": "npx tsc --build tsconfig.json",
+    "build": "npx rollup -c",
     "prepublishOnly": "rm -rf node_modules/ tsconfig.tsbuildinfo package-lock.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -29,9 +30,13 @@
   "dependencies": {
     "@jduarter/enhanced-promise": "0.0.6",
     "@jduarter/sysexec": "0.0.1",
+    "@rollup/plugin-typescript": "^8.2.1",
     "abortcontroller-polyfill": "^1.7.3",
     "jsonpatch": "^3.0.1",
     "ora": "^5.4.0",
+    "rollup": "^2.52.1",
+    "rollup-plugin-dts": "^3.0.2",
+    "rollup-plugin-terser": "^7.0.2",
     "throwable-error": "0.1.1",
     "ts-node": "^10.0.0",
     "tsc": "^2.0.3",
@@ -40,6 +45,8 @@
   "devDependencies": {
     "@types/node": "^15.12.1",
     "@types/package-info": "^3.0.0",
-    "prettier": "^2.3.1"
+    "prettier": "^2.3.1",
+    "rollup-plugin-preserve-shebangs": "^0.2.0",
+    "tslib": "^2.3.0"
   }
 }
