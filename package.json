@@ -1,6 +1,6 @@
 {
   "name": "expoize",
-  "version": "0.0.14-beta.2",
+  "version": "0.0.14-beta.5",
   "description": "💫 convert React Native projects into Expo environments.",
   "typeCoverage": {
     "atLeast": 92.9
@@ -15,7 +15,6 @@
   "scripts": {
     "typescript": "npx tsc --noEmit --composite false",
     "build": "npx rollup -c",
-    "prepublishOnly": "rm -rf node_modules/ tsconfig.tsbuildinfo package-lock.json",
     "test": "echo \"Error: no test specified\" && exit 0"
   },
   "keywords": [
@@ -45,9 +44,13 @@
   "devDependencies": {
     "@codechecks/build-size-watcher": "^0.1.0",
     "@codechecks/client": "^0.1.10",
+    "@rollup/plugin-node-resolve": "^13.0.0",
     "@types/node": "^15.12.1",
     "@types/package-info": "^3.0.0",
     "prettier": "^2.3.1",
+    "rollup-plugin-analyzer": "^4.0.0",
+    "rollup-plugin-cleanup": "^3.2.1",
+    "rollup-plugin-license": "^2.5.0",
     "rollup-plugin-preserve-shebangs": "^0.2.0",
     "tslib": "^2.3.0",
     "typecov": "^0.2.3"

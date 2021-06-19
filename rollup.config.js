@@ -1,8 +1,22 @@
 import typescript from '@rollup/plugin-typescript';
 import dts from 'rollup-plugin-dts';
 import { terser } from 'rollup-plugin-terser';
-
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { preserveShebangs } from 'rollup-plugin-preserve-shebangs';
+import cleanup from 'rollup-plugin-cleanup';
+import analyze from 'rollup-plugin-analyzer';
+import license from 'rollup-plugin-license';
+
+const path=require('path');
+
+const LICENSE_CFG = {
+  banner: {
+    content: {
+      file: path.join(__dirname, 'LICENSE'),
+      encoding: 'utf-8', // Default is utf-8
+    },
+  },
+};
 
 export default [
   {
@@ -12,11 +26,23 @@ export default [
       { file: 'build/expoize.min.js', format: 'cjs', plugins: [terser()] },
       { file: 'build/expoize.esm.js', format: 'esm' },
     ],
-    plugins: [typescript(), preserveShebangs()],
+    plugins: [
+      typescript(),
+      cleanup({ comments: 'none' }),
+      nodeResolve(),
+      license(LICENSE_CFG),
+      preserveShebangs(),
+      analyze(),
+    ],
   },
   {
     input: 'src/types.ts',
     output: [{ file: 'build/expoize.d.ts', format: 'es' }],
-    plugins: [dts()],
+    plugins: [
+      dts(),
+      cleanup({ comments: 'none' }),
+      license(LICENSE_CFG),
+      analyze(),
+    ],
   },
 ];

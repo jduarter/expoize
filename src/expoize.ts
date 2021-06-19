@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* eslint @typescript-eslint/no-var-requires:0, dot-notation:0 */
 import { runWithLog } from './runWithLog';
-
+import { banner as BANNER } from './banner';
 import { sysExec, SEJsonParser, SEPlaintextParser } from '@jduarter/sysexec';
 import type { SysExecParser, SysExecRetState } from '@jduarter/sysexec';
 import type {
@@ -42,7 +42,7 @@ const {
   exists: fsExists,
 } = require('fs/promises');
 
-require('./banner');
+console.log(BANNER);
 
 const readFile = async (fileName: string) => {
   const buf = await fsReadFile(fileName);
