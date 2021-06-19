@@ -1,4 +1,4 @@
-const BANNER: string =
+export const BANNER: string =
   '                             o              ' +
   '\n' +
   '                                             ' +
@@ -16,5 +16,3 @@ const BANNER: string =
   '::::::::::::::8 :::::::::::::::::::::::::::::' +
   '\n' +
   '::::::::::::::..:::::::::::::::::::::::::::::';
-
-console.log(BANNER);

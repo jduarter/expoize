@@ -1,4 +1,4 @@
-tsconfig.json
+tsconfig.*
 codechecks.yml
 .prettierrc.json
 rollup*

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* eslint @typescript-eslint/no-var-requires:0, dot-notation:0 */
 import { runWithLog } from './runWithLog';
-
+import { BANNER } from './banner';
 import { sysExec, SEJsonParser, SEPlaintextParser } from '@jduarter/sysexec';
 import type { SysExecParser, SysExecRetState } from '@jduarter/sysexec';
 import type {
@@ -15,6 +15,8 @@ import type {
   PackageInstallResult,
   PackageInstallErrorResult,
   AppJson,
+  Settings,
+  SettingHookCommandDefinition,
 } from './types';
 
 const jsonpatch = require('jsonpatch');
@@ -29,9 +31,27 @@ const origBabelConfigJs = require(PROJECT_PATH + '/babel.config.js');
 
 const NPM_INSTALL_READ_TIMEOUT = 60 * 5 * 1000;
 
-const { readFile: fsReadFile, writeFile: fsWriteFile } = require('fs/promises');
+const DEFAULT_SETTINGS: Settings = {
+  preCmds: [],
+  postCmds: [],
+};
 
-require('./banner');
+const {
+  readFile: fsReadFile,
+  writeFile: fsWriteFile,
+  lstat,
+} = require('fs/promises');
+
+console.log(BANNER);
+
+const fsExists = async (fn: string) => {
+  try {
+    await lstat(fn);
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
 
 const readFile = async (fileName: string) => {
   const buf = await fsReadFile(fileName);
@@ -275,7 +295,35 @@ const expoDoctor = async (): Promise<any> => {
   });
 };
 
+const getSettings = async (filename = 'expoize.conf.js'): Promise<Settings> => {
+  const fileExists = await fsExists(PROJECT_PATH + '/' + filename);
+
+  if (!fileExists) {
+    return DEFAULT_SETTINGS;
+  }
+
+  return { ...DEFAULT_SETTINGS, ...require(PROJECT_PATH + '/' + filename) };
+};
+
+const executeSettingsHooks = async (
+  cmds: SettingHookCommandDefinition[],
+): Promise<boolean> => {
+  if (cmds.length > 0) {
+    for (const [cmdName, cmdArgs = []] of cmds) {
+      await sysExec(cmdName, cmdArgs, SEPlaintextParser, {
+        readTimeout: 60000,
+      });
+    }
+  }
+
+  return true;
+};
+
 const main = async (): Promise<boolean> => {
+  const settings = await getSettings();
+
+  await executeSettingsHooks(settings.preCmds);
+
   const versions = await detectVersions();
 
   await patchAppJson({
