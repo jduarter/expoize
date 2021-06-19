@@ -42,6 +42,10 @@ export const runWithLog = async <T>(
     return Promise.resolve(promiseResolved);
   } catch (err) {
     spinner.fail(mainMessage + ': ' + err.name + ': ' + err.message);
+
+    console.log('');
+    console.log('Process output was: ', err.data);
+
     if (propagateErrors) {
       throw err;
     }
