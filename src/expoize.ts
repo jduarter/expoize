@@ -39,10 +39,19 @@ const DEFAULT_SETTINGS: Settings = {
 const {
   readFile: fsReadFile,
   writeFile: fsWriteFile,
-  exists: fsExists,
+  lstat,
 } = require('fs/promises');
 
 console.log(BANNER);
+
+const fsExists = async (fn: string) => {
+  try {
+    await lstat(fn);
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
 
 const readFile = async (fileName: string) => {
   const buf = await fsReadFile(fileName);
@@ -287,13 +296,13 @@ const expoDoctor = async (): Promise<any> => {
 };
 
 const getSettings = async (filename = 'expoize.conf.js'): Promise<Settings> => {
-  const fileExists = await fsExists(filename);
+  const fileExists = await fsExists(PROJECT_PATH + '/' + filename);
 
   if (!fileExists) {
     return DEFAULT_SETTINGS;
   }
 
-  return { ...DEFAULT_SETTINGS, ...require(filename) };
+  return { ...DEFAULT_SETTINGS, ...require(PROJECT_PATH + '/' + filename) };
 };
 
 const executeSettingsHooks = async (

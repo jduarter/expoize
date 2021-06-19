@@ -13,7 +13,6 @@ const LICENSE_CFG = {
   banner: {
     content: {
       file: path.join(__dirname, 'LICENSE'),
-      encoding: 'utf-8', // Default is utf-8
     },
   },
 };
