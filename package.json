@@ -1,6 +1,6 @@
 {
   "name": "expoize",
-  "version": "0.0.13-beta.1",
+  "version": "0.0.14-beta.1",
   "description": "💫 convert React Native projects into Expo environments.",
   "typeCoverage": {
     "atLeast": 92.9
@@ -49,6 +49,7 @@
     "@types/package-info": "^3.0.0",
     "prettier": "^2.3.1",
     "rollup-plugin-preserve-shebangs": "^0.2.0",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "typecov": "^0.2.3"
   }
 }
