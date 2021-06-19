@@ -121,3 +121,10 @@ export interface PackageInstallErrorResult {
     detail: string;
   };
 }
+
+export type SettingHookCommandDefinition = [string] | [string, string[]];
+
+export interface Settings {
+  preCmds: SettingHookCommandDefinition[];
+  postCmds: SettingHookCommandDefinition[];
+}

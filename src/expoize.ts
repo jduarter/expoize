@@ -15,6 +15,8 @@ import type {
   PackageInstallResult,
   PackageInstallErrorResult,
   AppJson,
+  Settings,
+  SettingHookCommandDefinition,
 } from './types';
 
 const jsonpatch = require('jsonpatch');
@@ -29,7 +31,16 @@ const origBabelConfigJs = require(PROJECT_PATH + '/babel.config.js');
 
 const NPM_INSTALL_READ_TIMEOUT = 60 * 5 * 1000;
 
-const { readFile: fsReadFile, writeFile: fsWriteFile } = require('fs/promises');
+const DEFAULT_SETTINGS: Settings = {
+  preCmds: [],
+  postCmds: [],
+};
+
+const {
+  readFile: fsReadFile,
+  writeFile: fsWriteFile,
+  exists: fsExists,
+} = require('fs/promises');
 
 require('./banner');
 
@@ -275,7 +286,35 @@ const expoDoctor = async (): Promise<any> => {
   });
 };
 
+const getSettings = async (filename = 'expoize.conf.js'): Promise<Settings> => {
+  const fileExists = await fsExists(filename);
+
+  if (!fileExists) {
+    return DEFAULT_SETTINGS;
+  }
+
+  return { ...DEFAULT_SETTINGS, ...require(filename) };
+};
+
+const executeSettingsHooks = async (
+  cmds: SettingHookCommandDefinition[],
+): Promise<boolean> => {
+  if (cmds.length > 0) {
+    for (const [cmdName, cmdArgs = []] of cmds) {
+      await sysExec(cmdName, cmdArgs, SEPlaintextParser, {
+        readTimeout: 60000,
+      });
+    }
+  }
+
+  return true;
+};
+
 const main = async (): Promise<boolean> => {
+  const settings = await getSettings();
+
+  await executeSettingsHooks(settings.preCmds);
+
   const versions = await detectVersions();
 
   await patchAppJson({
