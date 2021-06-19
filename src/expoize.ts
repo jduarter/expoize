@@ -392,6 +392,8 @@ const main = async (): Promise<boolean> => {
 
   await expoDoctor();
 
+  await executeSettingsHooks(settings.postCmds);
+
   return true;
 };
 
