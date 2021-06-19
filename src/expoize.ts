@@ -302,16 +302,27 @@ const getSettings = async (filename = 'expoize.conf.js'): Promise<Settings> => {
     return DEFAULT_SETTINGS;
   }
 
-  return { ...DEFAULT_SETTINGS, ...require(PROJECT_PATH + '/' + filename) };
+  return { ...DEFAULT_SETTINGS, ...require(PROJECT_PATH + '/' + filename)() };
 };
 
 const executeSettingsHooks = async (
   cmds: SettingHookCommandDefinition[],
 ): Promise<boolean> => {
   if (cmds.length > 0) {
-    for (const [cmdName, cmdArgs = []] of cmds) {
-      await sysExec(cmdName, cmdArgs, SEPlaintextParser, {
+    for (let idx in cmds) {
+      const [cmdName, cmdArgs = []] = cmds[idx];
+      const action = sysExec(cmdName, cmdArgs, SEPlaintextParser, {
         readTimeout: 60000,
+      });
+      await runWithLog<null | SysExecRetState<string>>(action, {
+        quiet: false,
+        mainMessage:
+          'running hook index=' +
+          idx +
+          ' (command: ' +
+          [cmdName, ...cmdArgs].join(' ') +
+          ')',
+        successMessage: 'success',
       });
     }
   }
