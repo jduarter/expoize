@@ -235,7 +235,7 @@ const NPMParser = ((buf: Buffer) => {
 const npmInstall = async (packageList: string[]) => {
   const action = sysExec(
     'npm',
-    ['install', '--json', ...packageList],
+    ['install', '--json', '--legacy-peer-deps', ...packageList],
     NPMParser,
     { readTimeout: NPM_INSTALL_READ_TIMEOUT },
   );
