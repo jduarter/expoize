@@ -390,7 +390,8 @@ const main = async (): Promise<boolean> => {
     'react-native-web',
   ]);
 
-  await expoDoctor();
+  /* @todo - implement in a more solid fashion. */
+  /* await expoDoctor(); */
 
   await executeSettingsHooks(settings.postCmds);
 
